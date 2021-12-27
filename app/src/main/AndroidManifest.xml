@@ -10,6 +10,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Olx">
         <activity
+            android:name=".activity.CadastrarAnuncioActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.MeusAnunciosActivity"
+            android:exported="false"
+            android:label="@string/title_activity_meus_anuncios"
+            android:theme="@style/Theme.Olx.NoActionBar" />
+        <activity
             android:name=".activity.CadastroActivity"
             android:exported="false" />
         <activity
