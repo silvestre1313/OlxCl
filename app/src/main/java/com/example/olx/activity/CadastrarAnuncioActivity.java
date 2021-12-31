@@ -14,8 +14,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 
 import com.blackcat.currencyedittext.CurrencyEditText;
 import com.example.olx.R;
@@ -30,6 +32,7 @@ public class CadastrarAnuncioActivity extends AppCompatActivity implements View.
 
     private EditText campoTitulo, campoDescricao;
     private ImageView imagem1, imagem2, imagem3;
+    private Spinner campoEstado, campoCategoria;
     private CurrencyEditText campoValor;
     private MaskEditText campoTelefone;
     private String[] permissoes = new String[]{
@@ -46,6 +49,8 @@ public class CadastrarAnuncioActivity extends AppCompatActivity implements View.
         Permissoes.validarPermissoes(permissoes, this, 1);
 
         inicializarComponentes();
+
+        carregarDadosSpinner();
 
     }
 
@@ -102,11 +107,35 @@ public class CadastrarAnuncioActivity extends AppCompatActivity implements View.
 
     }
 
+    private void carregarDadosSpinner(){
+
+        //Configura spinner de estados
+        String[] estados = getResources().getStringArray(R.array.estados);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                this, android.R.layout.simple_spinner_item,
+                estados
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        campoEstado.setAdapter(adapter);
+
+        //Configura spinner de categorias
+        String[] categorias = getResources().getStringArray(R.array.categorias);
+        ArrayAdapter<String> adapterCategoria = new ArrayAdapter<String>(
+                this, android.R.layout.simple_spinner_item,
+                categorias
+        );
+        adapterCategoria.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        campoCategoria.setAdapter(adapterCategoria);
+
+    }
+
     private void inicializarComponentes(){
         campoTitulo = findViewById(R.id.editTitulo);
         campoDescricao = findViewById(R.id.editDescricao);
         campoValor = findViewById(R.id.editValor);
         campoTelefone = findViewById(R.id.editTelefone);
+        campoEstado = findViewById(R.id.spinnerEstado);
+        campoCategoria = findViewById(R.id.spinnerCategoria);
         imagem1 = findViewById(R.id.imageCadastro1);
         imagem2 = findViewById(R.id.imageCadastro2);
         imagem3 = findViewById(R.id.imageCadastro3);
