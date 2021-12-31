@@ -13,11 +13,13 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.blackcat.currencyedittext.CurrencyEditText;
 import com.example.olx.R;
@@ -54,7 +56,56 @@ public class CadastrarAnuncioActivity extends AppCompatActivity implements View.
 
     }
 
-    public void salvarAnuncio(View view){
+    public void validarDadosAnuncio(View view){
+
+        String fone = "";
+        String estado = campoEstado.getSelectedItem().toString();
+        String categoria = campoCategoria.getSelectedItem().toString();
+        String titulo = campoTitulo.getText().toString();
+        String valor = String.valueOf(campoValor.getRawValue());
+        String telefone = campoTelefone.getText().toString();
+        if (campoTelefone.getUnMasked() != null){
+            fone = campoTelefone.getUnMasked();
+        }
+        String descricao = campoDescricao.getText().toString();
+
+        if (listaFotosRecuperadas.size() != 0){
+            if (!estado.isEmpty()){
+                if (!categoria.isEmpty()){
+                    if (!titulo.isEmpty()){
+                        if (!valor.isEmpty() && !valor.equals("0")){
+                            if (!telefone.isEmpty() && fone.length() >= 10){
+                                if (!descricao.isEmpty()){
+                                    salvarAnuncio();
+                                }else{
+                                    exibirMensagemErro("Preencha o campo descricao");
+                                }
+                            }else{
+                                exibirMensagemErro("Preencha o campo telefone, digite ao menos 10 numeros");
+                            }
+                        }else{
+                            exibirMensagemErro("Preencha o campo valor");
+                        }
+                    }else{
+                        exibirMensagemErro("Preencha o campo titulo");
+                    }
+                }else{
+                    exibirMensagemErro("Preencha o campo categoria");
+                }
+            }else{
+                exibirMensagemErro("Preencha o campo estado");
+            }
+        }else{
+            exibirMensagemErro("Selecione ao menos uma foto");
+        }
+
+    }
+
+    private void exibirMensagemErro(String mensagem){
+        Toast.makeText(this, mensagem, Toast.LENGTH_SHORT).show();
+    }
+
+    public void salvarAnuncio(){
 
 
 
