@@ -39,6 +39,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import dmax.dialog.SpotsDialog;
+
 public class CadastrarAnuncioActivity extends AppCompatActivity implements View.OnClickListener {
 
     private EditText campoTitulo, campoDescricao;
@@ -54,6 +56,7 @@ public class CadastrarAnuncioActivity extends AppCompatActivity implements View.
     private Anuncio anuncio;
     private String fone = "";
     private StorageReference storage;
+    private android.app.AlertDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +76,13 @@ public class CadastrarAnuncioActivity extends AppCompatActivity implements View.
     }
 
     public void salvarAnuncio(){
+
+        dialog = new SpotsDialog.Builder()
+                .setContext(this)
+                .setMessage("Salvando anuncio")
+                .setCancelable(false)
+                .build();
+        dialog.show();
 
         //Salvar imagem no Storage
         for (int i=0; i < listaFotosRecuperadas.size(); i++){
@@ -103,6 +113,9 @@ public class CadastrarAnuncioActivity extends AppCompatActivity implements View.
             if (totalFotos == listaUrlFotos.size()){
                 anuncio.setFotos(listaUrlFotos);
                 anuncio.salvar();
+
+                dialog.dismiss();
+                finish();
             }
         })).addOnFailureListener(e -> {
             exibirMensagemErro("Falha ao fazer upload");
@@ -116,7 +129,7 @@ public class CadastrarAnuncioActivity extends AppCompatActivity implements View.
         String estado = campoEstado.getSelectedItem().toString();
         String categoria = campoCategoria.getSelectedItem().toString();
         String titulo = campoTitulo.getText().toString();
-        String valor = String.valueOf(campoValor.getRawValue());
+        String valor = campoValor.getText().toString();
         String telefone = campoTelefone.getText().toString();
         if (campoTelefone.getUnMasked() != null){
             fone = campoTelefone.getUnMasked();
@@ -138,12 +151,13 @@ public class CadastrarAnuncioActivity extends AppCompatActivity implements View.
     public void validarDadosAnuncio(View view){
 
         anuncio = configurarAnuncio();
+        String valor = String.valueOf(campoValor.getRawValue());
 
         if (listaFotosRecuperadas.size() != 0){
             if (!anuncio.getEstado().isEmpty()){
                 if (!anuncio.getCategoria().isEmpty()){
                     if (!anuncio.getTitulo().isEmpty()){
-                        if (!anuncio.getValor().isEmpty() && !anuncio.getValor().equals("0")){
+                        if (!valor.isEmpty() && !valor.equals("0")){
                             if (!anuncio.getTelefone().isEmpty() && fone.length() >= 10){
                                 if (!anuncio.getDescricao().isEmpty()){
                                     salvarAnuncio();
