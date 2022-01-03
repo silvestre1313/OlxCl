@@ -23,8 +23,16 @@ import android.widget.Toast;
 
 import com.blackcat.currencyedittext.CurrencyEditText;
 import com.example.olx.R;
+import com.example.olx.helper.ConfiguracaoFirebase;
 import com.example.olx.helper.Permissoes;
 import com.example.olx.model.Anuncio;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.santalu.maskara.widget.MaskEditText;
 
 import java.util.ArrayList;
@@ -42,13 +50,18 @@ public class CadastrarAnuncioActivity extends AppCompatActivity implements View.
             Manifest.permission.READ_EXTERNAL_STORAGE
     };
     private List<String> listaFotosRecuperadas = new ArrayList<>();
+    private List<String> listaUrlFotos = new ArrayList<>();
     private Anuncio anuncio;
     private String fone = "";
+    private StorageReference storage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastrar_anuncio);
+
+        //Configurações iniciais
+        storage = ConfiguracaoFirebase.getFirebaseStorage();
 
         //Validar permissoes
         Permissoes.validarPermissoes(permissoes, this, 1);
@@ -71,7 +84,30 @@ public class CadastrarAnuncioActivity extends AppCompatActivity implements View.
 
     }
 
-    public void salvarFotoStorage(String urlImagem, int tamanhoLista, int i){
+    private void salvarFotoStorage(String urlString, int totalFotos, int contador){
+
+        //Criar nó no storage
+        StorageReference imagemAnuncio = storage.child("imagens")
+                .child("anuncios")
+                .child(anuncio.getIdAnuncio())
+                .child("imagem"+contador);
+
+        //Fazer upload do arquivo
+        UploadTask uploadTask = imagemAnuncio.putFile(Uri.parse(urlString));
+        uploadTask.addOnSuccessListener(taskSnapshot -> imagemAnuncio.getDownloadUrl().addOnCompleteListener(task -> {
+            Uri firebaseUrl = task.getResult();
+            String urlConvertida = firebaseUrl.toString();
+
+            listaUrlFotos.add(urlConvertida);
+
+            if (totalFotos == listaUrlFotos.size()){
+                anuncio.setFotos(listaUrlFotos);
+                anuncio.salvar();
+            }
+        })).addOnFailureListener(e -> {
+            exibirMensagemErro("Falha ao fazer upload");
+            Log.d("INFO", "Falha ao fazer upload: " + e.getMessage());
+        });
 
     }
 
