@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.olx.R;
 import com.example.olx.adapter.AdapterAnuncios;
@@ -42,6 +43,8 @@ public class AnunciosActivity extends AppCompatActivity {
     private DatabaseReference anunciosPublicosRef;
     private AlertDialog dialog;
     private String filtroEstado = "";
+    private String filtroCategoria = "";
+    private boolean filtrandoPorEstado = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,17 +90,87 @@ public class AnunciosActivity extends AppCompatActivity {
         dialogEstado.setPositiveButton("Ok", (dialog, which) -> {
             filtroEstado = spinnerEstado.getSelectedItem().toString();
             recuperarAnunciosPorEstado();
+            filtrandoPorEstado = true;
         });
 
-        dialogEstado.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        dialogEstado.setNegativeButton("Cancelar", (dialog, which) -> {
 
-            }
         });
 
         AlertDialog dialog = dialogEstado.create();
         dialog.show();
+
+    }
+
+    public void filtrarPorCategoria(View view){
+
+        if (filtrandoPorEstado){
+
+            AlertDialog.Builder dialogEstado = new AlertDialog.Builder(this);
+            dialogEstado.setTitle("Selecione a categoria desejada");
+
+            //Cofigurar spinner
+            View viewSpinner = getLayoutInflater().inflate(R.layout.dialog_spinner, null);
+
+            //Configura spinner de categorias
+            Spinner spinnerCategoria = viewSpinner.findViewById(R.id.spinnerFiltro);
+            String[] categorias = getResources().getStringArray(R.array.categorias);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                    this, android.R.layout.simple_spinner_item,
+                    categorias
+            );
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerCategoria.setAdapter(adapter);
+
+            dialogEstado.setView(viewSpinner);
+
+            dialogEstado.setPositiveButton("Ok", (dialog, which) -> {
+                filtroCategoria = spinnerCategoria.getSelectedItem().toString();
+                recuperarAnunciosPorCategoria();
+            });
+
+            dialogEstado.setNegativeButton("Cancelar", (dialog, which) -> {
+
+            });
+
+            AlertDialog dialog = dialogEstado.create();
+            dialog.show();
+
+        } else{
+            Toast.makeText(this, "Escolha primeiro uma regiao", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    public void recuperarAnunciosPorCategoria(){
+
+        //Configura no por estado
+        anunciosPublicosRef = ConfiguracaoFirebase.getFirebase()
+                .child("anuncios")
+                .child(filtroEstado)
+                .child(filtroCategoria);
+
+        anunciosPublicosRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                listaAnuncios.clear();
+                for (DataSnapshot anuncios: snapshot.getChildren()){
+                    Anuncio anuncio = anuncios.getValue(Anuncio.class);
+                    listaAnuncios.add(anuncio);
+
+                }
+
+                Collections.reverse(listaAnuncios);
+                adapterAnuncios.notifyDataSetChanged();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
     }
 
